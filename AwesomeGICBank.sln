@@ -1,0 +1,45 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35707.178 d17.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AwesomeGICBank.Core", "AwesomeGICBank.Core\AwesomeGICBank.Core.csproj", "{0FA7DF36-0813-4964-83A0-AE03BDF42219}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AwesomeGICBank.Infrastructure", "AwesomeGICBank.Infrastructure\AwesomeGICBank.Infrastructure.csproj", "{FC6A3879-0997-489D-AB52-1D415743D7EE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AwesomeGICBank.ConsoleApp", "AwesomeGICBank.ConsoleApp\AwesomeGICBank.ConsoleApp.csproj", "{BEC4AA1D-9E3E-46DA-AF16-C195C0C01D35}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AwesomeGICBank.Tests", "AwesomeGICBank.Tests\AwesomeGICBank.Tests.csproj", "{9B590AB8-1A12-42C5-AE73-7EDCF371AD56}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C81B1863-5748-42ED-A092-BB63166FFDDC}"
+	ProjectSection(SolutionItems) = preProject
+		C:\Users\kelum\OneDrive\Documents\Downloads\README_INSTRCUCTIONS.md = C:\Users\kelum\OneDrive\Documents\Downloads\README_INSTRCUCTIONS.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0FA7DF36-0813-4964-83A0-AE03BDF42219}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0FA7DF36-0813-4964-83A0-AE03BDF42219}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0FA7DF36-0813-4964-83A0-AE03BDF42219}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0FA7DF36-0813-4964-83A0-AE03BDF42219}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC6A3879-0997-489D-AB52-1D415743D7EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC6A3879-0997-489D-AB52-1D415743D7EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC6A3879-0997-489D-AB52-1D415743D7EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC6A3879-0997-489D-AB52-1D415743D7EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BEC4AA1D-9E3E-46DA-AF16-C195C0C01D35}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BEC4AA1D-9E3E-46DA-AF16-C195C0C01D35}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BEC4AA1D-9E3E-46DA-AF16-C195C0C01D35}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BEC4AA1D-9E3E-46DA-AF16-C195C0C01D35}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B590AB8-1A12-42C5-AE73-7EDCF371AD56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B590AB8-1A12-42C5-AE73-7EDCF371AD56}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B590AB8-1A12-42C5-AE73-7EDCF371AD56}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B590AB8-1A12-42C5-AE73-7EDCF371AD56}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
