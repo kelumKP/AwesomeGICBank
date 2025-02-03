@@ -25,7 +25,7 @@ namespace AwesomeGICBank.Core.Entities
                 throw new ArgumentException("Deposit amount must be greater than zero.");
 
             Balance += amount; // Add the amount to the balance
-            Transactions.Add(new Transaction(date, TransactionType.D, amount));
+            Transactions.Add(new Transaction(date, TransactionType.D, amount, Balance)); // Include EODBalance
         }
 
         public void Withdraw(decimal amount, DateTime date)
@@ -37,7 +37,7 @@ namespace AwesomeGICBank.Core.Entities
                 throw new InvalidOperationException("Insufficient balance.");
 
             Balance -= amount; // Subtract the amount from the balance
-            Transactions.Add(new Transaction(date, TransactionType.W, amount));
+            Transactions.Add(new Transaction(date, TransactionType.W, amount, Balance)); // Include EODBalance
         }
     }
 }

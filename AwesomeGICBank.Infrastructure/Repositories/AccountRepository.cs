@@ -22,18 +22,19 @@ namespace AwesomeGICBank.Infrastructure.Repositories
                 connection.Open();
                 var command = connection.CreateCommand();
                 command.CommandText = @"
-                CREATE TABLE IF NOT EXISTS Accounts (
-                    AccountNumber TEXT PRIMARY KEY,
-                    Balance DECIMAL NOT NULL
-                );
-                CREATE TABLE IF NOT EXISTS Transactions (
-                    TransactionId TEXT PRIMARY KEY,
-                    AccountNumber TEXT,
-                    Date TEXT NOT NULL,
-                    Type TEXT NOT NULL,
-                    Amount DECIMAL NOT NULL,
-                    FOREIGN KEY (AccountNumber) REFERENCES Accounts(AccountNumber)
-                );";
+        CREATE TABLE IF NOT EXISTS Accounts (
+            AccountNumber TEXT PRIMARY KEY,
+            Balance DECIMAL NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS Transactions (
+            TransactionId TEXT PRIMARY KEY,
+            AccountNumber TEXT,
+            Date TEXT NOT NULL,
+            Type TEXT NOT NULL,
+            Amount DECIMAL NOT NULL,
+            EODBalance DECIMAL NOT NULL, -- New column
+            FOREIGN KEY (AccountNumber) REFERENCES Accounts(AccountNumber)
+        );";
                 command.ExecuteNonQuery();
             }
         }
@@ -112,13 +113,14 @@ namespace AwesomeGICBank.Infrastructure.Repositories
 
                 var command = connection.CreateCommand();
                 command.CommandText = @"
-            INSERT INTO Transactions (TransactionId, AccountNumber, Date, Type, Amount)
-            VALUES (@TransactionId, @AccountNumber, @Date, @Type, @Amount)";
+        INSERT INTO Transactions (TransactionId, AccountNumber, Date, Type, Amount, EODBalance)
+        VALUES (@TransactionId, @AccountNumber, @Date, @Type, @Amount, @EODBalance)";
                 command.Parameters.AddWithValue("@TransactionId", transactionId);
                 command.Parameters.AddWithValue("@AccountNumber", accountNumber);
                 command.Parameters.AddWithValue("@Date", date.ToString("yyyyMMdd"));
                 command.Parameters.AddWithValue("@Type", type.ToString());
                 command.Parameters.AddWithValue("@Amount", amount);
+                command.Parameters.AddWithValue("@EODBalance", currentBalance); // Add EODBalance
 
                 command.ExecuteNonQuery();
             }
@@ -151,10 +153,10 @@ namespace AwesomeGICBank.Infrastructure.Repositories
                 connection.Open();
                 var command = connection.CreateCommand();
                 command.CommandText = @"
-                SELECT TransactionId, Date, Type, Amount 
-                FROM Transactions 
-                WHERE AccountNumber = @AccountNumber 
-                ORDER BY Date";
+        SELECT TransactionId, Date, Type, Amount, EODBalance 
+        FROM Transactions 
+        WHERE AccountNumber = @AccountNumber 
+        ORDER BY Date";
                 command.Parameters.AddWithValue("@AccountNumber", accountNumber);
 
                 using (var reader = command.ExecuteReader())
@@ -165,14 +167,13 @@ namespace AwesomeGICBank.Infrastructure.Repositories
                         var date = DateTime.ParseExact(reader.GetString(1), "yyyyMMdd", null);
                         var typeString = reader.GetString(2); // "Deposit" or "Withdrawal"
                         var amount = reader.GetDecimal(3);
+                        var eodBalance = reader.GetDecimal(4); // Read EODBalance
 
                         // Convert the string type to TransactionType enum
                         TransactionType type = typeString == "D" ? TransactionType.D : TransactionType.W;
 
-                        transactions.Add(new Transaction(date, type, amount)
-                        {
-                            
-                        });
+                        transactions.Add(new Transaction(date, type, amount, eodBalance));
+
                     }
                 }
             }
