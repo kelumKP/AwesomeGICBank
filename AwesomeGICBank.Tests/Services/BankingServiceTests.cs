@@ -7,7 +7,7 @@ using AwesomeGICBank.Core.Entities;
 using AwesomeGICBank.Core.Interfaces.AwesomeGICBank.Core.Interfaces;
 using AwesomeGICBank.Core.Interfaces;
 
-namespace AwesomeGICBank.Tests
+namespace AwesomeGICBank.Tests.Services
 {
     public class BankingServiceTests
     {

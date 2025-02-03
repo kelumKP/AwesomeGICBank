@@ -5,7 +5,7 @@ using AwesomeGICBank.Entities;
 using AwesomeGICBank.Infrastructure.Repositories;
 using AwesomeGICBank.Core.Interfaces;
 
-namespace AwesomeGICBank.Tests
+namespace AwesomeGICBank.Tests.Services
 {
     public class InterestRuleServiceTests
     {
