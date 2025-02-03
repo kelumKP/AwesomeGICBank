@@ -71,7 +71,7 @@ namespace AwesomeGICBank.ConsoleApp
             {
                 var date = DateTime.ParseExact(parts[0], "yyyyMMdd", null);
                 var accountNumber = parts[1];
-                var type = parts[2].ToUpper() == "D" ? TransactionType.Deposit : TransactionType.Withdrawal;
+                var type = parts[2].ToUpper() == "D" ? TransactionType.D : TransactionType.W;
                 var amount = decimal.Parse(parts[3]);
 
                 bankingService.ProcessTransaction(accountNumber, date, type, amount);
@@ -170,7 +170,7 @@ namespace AwesomeGICBank.ConsoleApp
                 decimal balance = 0;
                 foreach (var txn in transactions)
                 {
-                    balance += txn.Type == TransactionType.Deposit ? txn.Amount : -txn.Amount;
+                    balance += txn.Type == TransactionType.D ? txn.Amount : -txn.Amount;
                     Console.WriteLine($"| {txn.Date:yyyyMMdd} | {txn.TransactionId} | {txn.Type} | {txn.Amount,7:F2} | {balance,7:F2} |");
                 }
 

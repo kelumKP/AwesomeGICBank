@@ -19,11 +19,11 @@ namespace AwesomeGICBank.Core.Services
         {
             var account = _accountRepository.FindOrCreateAccount(accountNumber);
 
-            if (type == TransactionType.Deposit)
+            if (type == TransactionType.D)
             {
                 account.Deposit(amount, date); // Add the amount to the balance
             }
-            else if (type == TransactionType.Withdrawal)
+            else if (type == TransactionType.W)
             {
                 account.Withdraw(amount, date); // Subtract the amount from the balance
             }
@@ -58,7 +58,7 @@ namespace AwesomeGICBank.Core.Services
             var currentDate = startDate;
             var currentBalance = account.Transactions
                                        .Where(t => t.Date < startDate)
-                                       .Sum(t => t.Type == TransactionType.Deposit ? t.Amount : -t.Amount);
+                                       .Sum(t => t.Type == TransactionType.D ? t.Amount : -t.Amount);
 
             while (currentDate <= endDate)
             {
@@ -70,7 +70,7 @@ namespace AwesomeGICBank.Core.Services
 
                 foreach (var txn in transactionsForDay)
                 {
-                    if (txn.Type == TransactionType.Deposit)
+                    if (txn.Type == TransactionType.D)
                         currentBalance += txn.Amount;
                     else
                         currentBalance -= txn.Amount;

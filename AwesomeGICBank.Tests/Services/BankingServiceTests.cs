@@ -37,8 +37,8 @@ namespace AwesomeGICBank.Tests.Services
             var date2 = DateTime.ParseExact("20230615", "yyyyMMdd", null);
             var date3 = DateTime.ParseExact("20230626", "yyyyMMdd", null);
 
-            _bankingService.ProcessTransaction(accountNumber, date1, TransactionType.Deposit, 250.00m);
-            _bankingService.ProcessTransaction(accountNumber, date3, TransactionType.Withdrawal, 120.00m);
+            _bankingService.ProcessTransaction(accountNumber, date1, TransactionType.D, 250.00m);
+            _bankingService.ProcessTransaction(accountNumber, date3, TransactionType.W, 120.00m);
 
             var transactions = _bankingService.GetAccountTransactions(accountNumber);
             Assert.IsNotEmpty(transactions, "Transactions were not saved to the database.");

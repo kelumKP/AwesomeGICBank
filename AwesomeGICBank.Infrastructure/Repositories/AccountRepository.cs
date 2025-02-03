@@ -91,11 +91,11 @@ namespace AwesomeGICBank.Infrastructure.Repositories
                 var currentBalance = Convert.ToDecimal(checkAccountCommand.ExecuteScalar());
 
                 // Update the account balance based on the transaction type
-                if (type == TransactionType.Deposit)
+                if (type == TransactionType.D)
                 {
                     currentBalance += amount; // Add the amount for deposits
                 }
-                else if (type == TransactionType.Withdrawal)
+                else if (type == TransactionType.W)
                 {
                     currentBalance -= amount; // Subtract the amount for withdrawals
                 }
@@ -167,7 +167,7 @@ namespace AwesomeGICBank.Infrastructure.Repositories
                         var amount = reader.GetDecimal(3);
 
                         // Convert the string type to TransactionType enum
-                        TransactionType type = typeString == "Deposit" ? TransactionType.Deposit : TransactionType.Withdrawal;
+                        TransactionType type = typeString == "D" ? TransactionType.D : TransactionType.W;
 
                         transactions.Add(new Transaction(date, type, amount)
                         {

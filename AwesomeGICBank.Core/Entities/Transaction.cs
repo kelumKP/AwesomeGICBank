@@ -24,7 +24,7 @@ namespace AwesomeGICBank.Core.Entities
 
     public enum TransactionType
     {
-        Deposit,
-        Withdrawal
+        D,
+        W
     }
 }
