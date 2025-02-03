@@ -3,9 +3,9 @@ using NUnit.Framework;
 using AwesomeGICBank.Core.Services;
 using AwesomeGICBank.Entities;
 using AwesomeGICBank.Core.Entities;
-using AwesomeGICBank.Core.Interfaces.AwesomeGICBank.Core.Interfaces;
 using AwesomeGICBank.Core.Interfaces;
 using AwesomeGICBank.Infrastructure.Repositories;
+using SQLitePCL;
 
 namespace AwesomeGICBank.Tests.Services
 {
@@ -18,9 +18,15 @@ namespace AwesomeGICBank.Tests.Services
         [SetUp]
         public void Setup()
         {
+            Batteries_V2.Init(); // Correct SQLite initialization
+
             _accountRepository = new AccountRepository();
             _interestRuleRepository = new InterestRuleRepository();
             _bankingService = new BankingService(_accountRepository, _interestRuleRepository);
+
+            // Ensure the account exists before transactions
+            var accountNumber = "AC001";
+            var account = _accountRepository.FindOrCreateAccount(accountNumber);
         }
 
         [Test]
@@ -34,11 +40,15 @@ namespace AwesomeGICBank.Tests.Services
             _bankingService.ProcessTransaction(accountNumber, date1, TransactionType.Deposit, 250.00m);
             _bankingService.ProcessTransaction(accountNumber, date3, TransactionType.Withdrawal, 120.00m);
 
+            var transactions = _bankingService.GetAccountTransactions(accountNumber);
+            Assert.IsNotEmpty(transactions, "Transactions were not saved to the database.");
+
             _interestRuleRepository.AddOrUpdateRule(new InterestRule(date1, "RULE02", 1.90m));
             _interestRuleRepository.AddOrUpdateRule(new InterestRule(date2, "RULE03", 2.20m));
 
-            var interest = _bankingService.CalculateInterest(accountNumber, 2023, 6);
+            var interest = _bankingService.CalculateInterest(accountNumber, 2024, 2);
             Assert.AreEqual(0.39m, interest);
         }
+
     }
 }

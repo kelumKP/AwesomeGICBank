@@ -21,15 +21,22 @@ namespace AwesomeGICBank.Core.Entities
 
         public void Deposit(decimal amount, DateTime date)
         {
-            Balance += amount;
+            if (amount <= 0)
+                throw new ArgumentException("Deposit amount must be greater than zero.");
+
+            Balance += amount; // Add the amount to the balance
             Transactions.Add(new Transaction(date, TransactionType.Deposit, amount));
         }
 
         public void Withdraw(decimal amount, DateTime date)
         {
+            if (amount <= 0)
+                throw new ArgumentException("Withdrawal amount must be greater than zero.");
+
             if (Balance < amount)
                 throw new InvalidOperationException("Insufficient balance.");
-            Balance -= amount;
+
+            Balance -= amount; // Subtract the amount from the balance
             Transactions.Add(new Transaction(date, TransactionType.Withdrawal, amount));
         }
     }

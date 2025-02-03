@@ -1,6 +1,8 @@
 ﻿using AwesomeGICBank.Core.Entities;
-using AwesomeGICBank.Core.Interfaces.AwesomeGICBank.Core.Interfaces;
+using AwesomeGICBank.Core.Interfaces;
 using Microsoft.Data.Sqlite;
+using System;
+using System.Collections.Generic;
 
 namespace AwesomeGICBank.Infrastructure.Repositories
 {
@@ -74,6 +76,107 @@ namespace AwesomeGICBank.Infrastructure.Repositories
                 account = new Account(accountNumber);
             }
             return account;
+        }
+
+        public void AddTransaction(string accountNumber, DateTime date, TransactionType type, decimal amount)
+        {
+            using (var connection = new SqliteConnection(ConnectionString))
+            {
+                connection.Open();
+
+                // Ensure account exists before inserting transaction
+                var checkAccountCommand = connection.CreateCommand();
+                checkAccountCommand.CommandText = "SELECT Balance FROM Accounts WHERE AccountNumber = @AccountNumber";
+                checkAccountCommand.Parameters.AddWithValue("@AccountNumber", accountNumber);
+                var currentBalance = Convert.ToDecimal(checkAccountCommand.ExecuteScalar());
+
+                // Update the account balance based on the transaction type
+                if (type == TransactionType.Deposit)
+                {
+                    currentBalance += amount; // Add the amount for deposits
+                }
+                else if (type == TransactionType.Withdrawal)
+                {
+                    currentBalance -= amount; // Subtract the amount for withdrawals
+                }
+
+                // Update the account balance in the database
+                var updateBalanceCommand = connection.CreateCommand();
+                updateBalanceCommand.CommandText = "UPDATE Accounts SET Balance = @Balance WHERE AccountNumber = @AccountNumber";
+                updateBalanceCommand.Parameters.AddWithValue("@Balance", currentBalance);
+                updateBalanceCommand.Parameters.AddWithValue("@AccountNumber", accountNumber);
+                updateBalanceCommand.ExecuteNonQuery();
+
+                // Insert the transaction
+                var transactionId = $"{date:yyyyMMdd}-{GetNextTransactionNumber(accountNumber, date):00}";
+
+                var command = connection.CreateCommand();
+                command.CommandText = @"
+            INSERT INTO Transactions (TransactionId, AccountNumber, Date, Type, Amount)
+            VALUES (@TransactionId, @AccountNumber, @Date, @Type, @Amount)";
+                command.Parameters.AddWithValue("@TransactionId", transactionId);
+                command.Parameters.AddWithValue("@AccountNumber", accountNumber);
+                command.Parameters.AddWithValue("@Date", date.ToString("yyyyMMdd"));
+                command.Parameters.AddWithValue("@Type", type.ToString());
+                command.Parameters.AddWithValue("@Amount", amount);
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+
+        private int GetNextTransactionNumber(string accountNumber, DateTime date)
+        {
+            using (var connection = new SqliteConnection(ConnectionString))
+            {
+                connection.Open();
+                var command = connection.CreateCommand();
+                command.CommandText = @"
+                SELECT COUNT(*) 
+                FROM Transactions 
+                WHERE AccountNumber = @AccountNumber AND Date = @Date";
+                command.Parameters.AddWithValue("@AccountNumber", accountNumber);
+                command.Parameters.AddWithValue("@Date", date.ToString("yyyyMMdd"));
+
+                var count = Convert.ToInt32(command.ExecuteScalar());
+                return count + 1;
+            }
+        }
+
+        public List<Transaction> GetTransactionsForAccount(string accountNumber)
+        {
+            var transactions = new List<Transaction>();
+            using (var connection = new SqliteConnection(ConnectionString))
+            {
+                connection.Open();
+                var command = connection.CreateCommand();
+                command.CommandText = @"
+                SELECT TransactionId, Date, Type, Amount 
+                FROM Transactions 
+                WHERE AccountNumber = @AccountNumber 
+                ORDER BY Date";
+                command.Parameters.AddWithValue("@AccountNumber", accountNumber);
+
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var transactionId = reader.GetString(0);
+                        var date = DateTime.ParseExact(reader.GetString(1), "yyyyMMdd", null);
+                        var typeString = reader.GetString(2); // "Deposit" or "Withdrawal"
+                        var amount = reader.GetDecimal(3);
+
+                        // Convert the string type to TransactionType enum
+                        TransactionType type = typeString == "Deposit" ? TransactionType.Deposit : TransactionType.Withdrawal;
+
+                        transactions.Add(new Transaction(date, type, amount)
+                        {
+                            
+                        });
+                    }
+                }
+            }
+            return transactions;
         }
     }
 }

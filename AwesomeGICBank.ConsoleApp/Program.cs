@@ -76,6 +76,18 @@ namespace AwesomeGICBank.ConsoleApp
 
                 bankingService.ProcessTransaction(accountNumber, date, type, amount);
                 Console.WriteLine("Transaction processed successfully.");
+
+                // Fetch and display the transaction history for the account
+                var transactions = bankingService.GetAccountTransactions(accountNumber)
+                                                .OrderBy(t => t.Date)
+                                                .ToList();
+
+                Console.WriteLine($"Account: {accountNumber}");
+                Console.WriteLine("| Date     | Txn Id      | Type | Amount |");
+                foreach (var txn in transactions)
+                {
+                    Console.WriteLine($"| {txn.Date:yyyyMMdd} | {txn.TransactionId} | {txn.Type} | {txn.Amount,7:F2} |");
+                }
             }
             catch (Exception ex)
             {

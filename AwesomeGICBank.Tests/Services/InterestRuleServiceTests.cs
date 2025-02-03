@@ -4,17 +4,21 @@ using AwesomeGICBank.Core.Services;
 using AwesomeGICBank.Entities;
 using AwesomeGICBank.Infrastructure.Repositories;
 using AwesomeGICBank.Core.Interfaces;
+using SQLitePCL;
 
 namespace AwesomeGICBank.Tests.Services
 {
     public class InterestRuleServiceTests
     {
         private InterestRuleService _interestRuleService;
-        private IInterestRuleRepository _interestRuleRepository;
+        private InterestRuleRepository _interestRuleRepository;
 
         [SetUp]
         public void Setup()
         {
+            // Initialize SQLite
+            Batteries.Init();
+
             _interestRuleRepository = new InterestRuleRepository();
             _interestRuleService = new InterestRuleService(_interestRuleRepository);
         }
