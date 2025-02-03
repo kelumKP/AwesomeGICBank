@@ -2,10 +2,10 @@
 using NUnit.Framework;
 using AwesomeGICBank.Core.Services;
 using AwesomeGICBank.Entities;
-using AwesomeGICBank.Infrastructure.Repositories;
 using AwesomeGICBank.Core.Entities;
 using AwesomeGICBank.Core.Interfaces.AwesomeGICBank.Core.Interfaces;
 using AwesomeGICBank.Core.Interfaces;
+using AwesomeGICBank.Infrastructure.Repositories;
 
 namespace AwesomeGICBank.Tests.Services
 {

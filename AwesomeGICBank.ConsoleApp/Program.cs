@@ -3,6 +3,7 @@ using AwesomeGICBank.Core.Entities;
 using AwesomeGICBank.Core.Services;
 using AwesomeGICBank.Entities;
 using AwesomeGICBank.Infrastructure.Repositories;
+using SQLitePCL;
 
 namespace AwesomeGICBank.ConsoleApp
 {
@@ -10,6 +11,9 @@ namespace AwesomeGICBank.ConsoleApp
     {
         static void Main(string[] args)
         {
+            // Initialize SQLite
+            Batteries.Init();
+
             var accountRepository = new AccountRepository();
             var interestRuleRepository = new InterestRuleRepository();
             var bankingService = new BankingService(accountRepository, interestRuleRepository);
