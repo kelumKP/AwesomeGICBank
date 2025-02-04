@@ -5,10 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AwesomeGICBank.Application.Interfaces;
 
 namespace AwesomeGICBank.Application
 {
-    public class BankingService
+    public class BankingService : IBankingService
     {
         private readonly IAccountRepository _accountRepository;
         private readonly IInterestRuleRepository _interestRuleRepository;

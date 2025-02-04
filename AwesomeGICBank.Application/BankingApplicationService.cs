@@ -4,23 +4,20 @@ using AwesomeGICBank.Application.DTOs;
 using System;
 using System.Threading.Tasks;
 using SQLitePCL;
+using AwesomeGICBank.Application.Interfaces;
 
 namespace AwesomeGICBank.Application
 {
     public class BankingApplicationService
     {
-        private readonly BankingService _bankingService;
-        private readonly InterestRuleService _interestRuleService;
+        private readonly IBankingService _bankingService;
+        private readonly IInterestRuleService _interestRuleService;
 
-        public BankingApplicationService()
+        // Inject dependencies via constructor
+        public BankingApplicationService(IBankingService bankingService, IInterestRuleService interestRuleService)
         {
-            Batteries.Init();
-
-            var accountRepository = new AccountRepository();
-            var interestRuleRepository = new InterestRuleRepository();
-            var transactionRepository = new TransactionRepository();
-            _bankingService = new BankingService(accountRepository, interestRuleRepository, transactionRepository);
-            _interestRuleService = new InterestRuleService(interestRuleRepository);
+            _bankingService = bankingService;
+            _interestRuleService = interestRuleService;
         }
 
         public void Start()

@@ -4,10 +4,11 @@ using AwesomeGICBank.Application.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AwesomeGICBank.Application.Interfaces;
 
 namespace AwesomeGICBank.Application
 {
-    public class InterestRuleService
+    public class InterestRuleService  : IInterestRuleService
     {
         private readonly IInterestRuleRepository _interestRuleRepository;
 
@@ -18,6 +19,9 @@ namespace AwesomeGICBank.Application
 
         public void AddOrUpdateInterestRule(InterestRuleInputDto inputDto)
         {
+            if (string.IsNullOrWhiteSpace(inputDto.RuleId))
+                throw new ArgumentException("Rule ID cannot be null or empty.");
+
             if (inputDto.Rate <= 0 || inputDto.Rate >= 100)
                 throw new ArgumentException("Interest rate must be greater than 0 and less than 100.");
 

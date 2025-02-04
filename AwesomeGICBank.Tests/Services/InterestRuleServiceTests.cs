@@ -57,8 +57,84 @@ namespace AwesomeGICBank.Tests.Services
             };
 
             // Act and Assert: Ensure an exception is thrown for invalid rate
-            Assert.Throws<ArgumentException>(() =>
+            var ex = Assert.Throws<ArgumentException>(() =>
                 _interestRuleService.AddOrUpdateInterestRule(inputDto));
+
+            // Assert the exception message
+            Assert.AreEqual("Interest rate must be greater than 0 and less than 100.", ex.Message);
+
+            // Verify that the repository method was not called
+            _mockInterestRuleRepository
+                .Verify(r => r.AddOrUpdateRule(It.IsAny<InterestRule>()), Times.Never);
+        }
+
+        [Test]
+        public void AddOrUpdateInterestRule_RateIsZero_ThrowsException()
+        {
+            // Arrange
+            var inputDto = new InterestRuleInputDto
+            {
+                Date = DateTime.ParseExact("20230615", "yyyyMMdd", null),
+                RuleId = "RULE03",
+                Rate = 0.00m // Invalid rate
+            };
+
+            // Act and Assert: Ensure an exception is thrown for invalid rate
+            var ex = Assert.Throws<ArgumentException>(() =>
+                _interestRuleService.AddOrUpdateInterestRule(inputDto));
+
+            // Assert the exception message
+            Assert.AreEqual("Interest rate must be greater than 0 and less than 100.", ex.Message);
+
+            // Verify that the repository method was not called
+            _mockInterestRuleRepository
+                .Verify(r => r.AddOrUpdateRule(It.IsAny<InterestRule>()), Times.Never);
+        }
+
+        [Test]
+        public void AddOrUpdateInterestRule_RateIs100_ThrowsException()
+        {
+            // Arrange
+            var inputDto = new InterestRuleInputDto
+            {
+                Date = DateTime.ParseExact("20230615", "yyyyMMdd", null),
+                RuleId = "RULE03",
+                Rate = 100.00m // Invalid rate
+            };
+
+            // Act and Assert: Ensure an exception is thrown for invalid rate
+            var ex = Assert.Throws<ArgumentException>(() =>
+                _interestRuleService.AddOrUpdateInterestRule(inputDto));
+
+            // Assert the exception message
+            Assert.AreEqual("Interest rate must be greater than 0 and less than 100.", ex.Message);
+
+            // Verify that the repository method was not called
+            _mockInterestRuleRepository
+                .Verify(r => r.AddOrUpdateRule(It.IsAny<InterestRule>()), Times.Never);
+        }
+
+        [Test]
+        public void AddOrUpdateInterestRule_NullOrEmptyRuleId_ThrowsException()
+        {
+            // Arrange
+            var inputDto = new InterestRuleInputDto
+            {
+                Date = DateTime.ParseExact("20230615", "yyyyMMdd", null),
+                RuleId = "", // Invalid RuleId
+                Rate = 2.20m
+            };
+
+            // Act and Assert: Ensure an exception is thrown for invalid RuleId
+            var ex = Assert.Throws<ArgumentException>(() =>
+                _interestRuleService.AddOrUpdateInterestRule(inputDto));
+
+            // Assert the exception message
+            Assert.AreEqual("Rule ID cannot be null or empty.", ex.Message);
+
+            // Verify that the repository method was not called
+            _mockInterestRuleRepository
+                .Verify(r => r.AddOrUpdateRule(It.IsAny<InterestRule>()), Times.Never);
         }
     }
 }

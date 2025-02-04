@@ -36,7 +36,7 @@ namespace AwesomeGICBank.Tests.Services
         }
 
         [Test]
-        public void ProcessTransaction_Deposit_ShouldUpdateBalance()
+        public void ProcessTransaction_ValidDeposit_UpdatesAccountBalanceAndCallsRepository()
         {
             // Arrange
             string accountNumber = "12345";
@@ -62,7 +62,7 @@ namespace AwesomeGICBank.Tests.Services
         }
 
         [Test]
-        public void ProcessTransaction_Withdraw_ShouldUpdateBalance()
+        public void ProcessTransaction_ValidWithdrawal_UpdatesAccountBalanceAndCallsRepository()
         {
             // Arrange
             string accountNumber = "12345";
@@ -90,7 +90,7 @@ namespace AwesomeGICBank.Tests.Services
         }
 
         [Test]
-        public void ProcessTransaction_Withdraw_InsufficientBalance_ShouldThrowException()
+        public void ProcessTransaction_InsufficientBalance_ThrowsException()
         {
             // Arrange
             string accountNumber = "12345";
@@ -112,10 +112,41 @@ namespace AwesomeGICBank.Tests.Services
                 _bankingService.ProcessTransaction(transactionDto));
 
             Assert.AreEqual("Insufficient balance.", exception.Message);
+
+            // Verify that the repository method was not called
+            _mockAccountRepository.Verify(repo => repo.AddTransaction(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<TransactionType>(), It.IsAny<decimal>()), Times.Never);
         }
 
         [Test]
-        public async Task GetTransactionsForAccount_ShouldReturnTransactions()
+        public void ProcessTransaction_NegativeAmount_ThrowsException()
+        {
+            // Arrange
+            string accountNumber = "12345";
+            DateTime transactionDate = DateTime.Now;
+            decimal negativeAmount = -50;
+            var account = new Account(accountNumber);
+            _mockAccountRepository.Setup(repo => repo.FindOrCreateAccount(accountNumber)).Returns(account);
+
+            var transactionDto = new TransactionInputDto
+            {
+                AccountNumber = accountNumber,
+                Date = transactionDate,
+                Type = TransactionType.D,
+                Amount = negativeAmount
+            };
+
+            // Act & Assert
+            var exception = Assert.Throws<ArgumentException>(() =>
+                _bankingService.ProcessTransaction(transactionDto));
+
+            Assert.AreEqual("Transaction amount must be greater than zero.", exception.Message);
+
+            // Verify that the repository method was not called
+            _mockAccountRepository.Verify(repo => repo.AddTransaction(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<TransactionType>(), It.IsAny<decimal>()), Times.Never);
+        }
+
+        [Test]
+        public async Task GetTransactionsForAccount_ValidAccount_ReturnsTransactions()
         {
             // Arrange
             string accountNumber = "12345";
@@ -135,6 +166,23 @@ namespace AwesomeGICBank.Tests.Services
             Assert.AreEqual(2, result.Count);
             Assert.AreEqual("txn1", result[0].TransactionId);
             Assert.AreEqual("txn2", result[1].TransactionId);
+        }
+
+        [Test]
+        public async Task GetTransactionsForAccount_NoTransactions_ReturnsEmptyList()
+        {
+            // Arrange
+            string accountNumber = "12345";
+            var transactions = new List<Transaction>();
+
+            _mockTransactionRepository.Setup(repo => repo.GetAllTransactionsForAccount(accountNumber))
+                .ReturnsAsync(transactions);
+
+            // Act
+            var result = await _bankingService.GetTransactionsForAccount(accountNumber);
+
+            // Assert
+            Assert.IsEmpty(result);
         }
     }
 }
