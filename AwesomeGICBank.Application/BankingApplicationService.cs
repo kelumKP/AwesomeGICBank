@@ -82,8 +82,21 @@ namespace AwesomeGICBank.Application
                     Amount = decimal.Parse(parts[3])
                 };
 
+                // Process the transaction
                 _bankingService.ProcessTransaction(transactionDto);
                 Console.WriteLine("Transaction processed successfully.");
+
+                // Fetch the updated list of transactions for the account
+                var transactions = _bankingService.GetAccountTransactions(transactionDto.AccountNumber);
+
+                // Display the transactions in the desired format
+                Console.WriteLine($"Account: {transactionDto.AccountNumber}");
+                Console.WriteLine("| Date     | Txn Id      | Type | Amount |");
+
+                foreach (var txn in transactions)
+                {
+                    Console.WriteLine($"| {txn.Date:yyyyMMdd} | {txn.TransactionId} | {txn.Type} | {txn.Amount,7:F2} |");
+                }
             }
             catch (Exception ex)
             {
@@ -115,8 +128,21 @@ namespace AwesomeGICBank.Application
                     Rate = decimal.Parse(parts[2])
                 };
 
+                // Add or update the interest rule
                 _interestRuleService.AddOrUpdateInterestRule(interestRuleDto);
                 Console.WriteLine("Interest rule added/updated successfully.");
+
+                // Fetch the updated list of interest rules
+                var interestRules = _interestRuleService.GetAllInterestRules();
+
+                // Display the interest rules in the desired format
+                Console.WriteLine("Interest rules:");
+                Console.WriteLine("| Date     | RuleId | Rate (%) |");
+
+                foreach (var rule in interestRules)
+                {
+                    Console.WriteLine($"| {rule.Date:yyyyMMdd} | {rule.RuleId} | {rule.Rate,7:F2} |");
+                }
             }
             catch (Exception ex)
             {
