@@ -2,6 +2,7 @@
 using AwesomeGICBank.Core.Services;
 using AwesomeGICBank.Infrastructure.Repositories;
 using SQLitePCL;
+using AwesomeGICBank.Application.DTOs;
 
 namespace AwesomeGICBank.Application
 {
@@ -12,7 +13,6 @@ namespace AwesomeGICBank.Application
 
         public BankingApplicationService()
         {
-            // Initialize SQLite
             Batteries.Init();
 
             var accountRepository = new AccountRepository();
@@ -48,7 +48,7 @@ namespace AwesomeGICBank.Application
                         break;
                     case "Q":
                         Quit();
-                        return; // Exit the application
+                        return;
                     default:
                         Console.WriteLine("Invalid option. Please try again.");
                         break;
@@ -58,12 +58,11 @@ namespace AwesomeGICBank.Application
 
         private void InputTransaction()
         {
-            Console.WriteLine("Please enter transaction details in <Date> <Account> <Type> <Amount> format (or enter blank to go back to main menu):");
+            Console.WriteLine("Enter transaction details <Date YYYYMMDD> <Account> <D/W> <Amount>:");
             Console.Write("> ");
             var input = Console.ReadLine();
 
-            if (string.IsNullOrWhiteSpace(input))
-                return;
+            if (string.IsNullOrWhiteSpace(input)) return;
 
             var parts = input.Split(' ');
             if (parts.Length != 4)
@@ -74,25 +73,16 @@ namespace AwesomeGICBank.Application
 
             try
             {
-                var date = DateTime.ParseExact(parts[0], "yyyyMMdd", null);
-                var accountNumber = parts[1];
-                var type = parts[2].ToUpper() == "D" ? TransactionType.D : TransactionType.W;
-                var amount = decimal.Parse(parts[3]);
-
-                _bankingService.ProcessTransaction(accountNumber, date, type, amount);
-                Console.WriteLine("Transaction processed successfully.");
-
-                // Fetch and display the transaction history for the account
-                var transactions = _bankingService.GetAccountTransactions(accountNumber)
-                                                .OrderBy(t => t.Date)
-                                                .ToList();
-
-                Console.WriteLine($"Account: {accountNumber}");
-                Console.WriteLine("| Date     | Txn Id      | Type | Amount |");
-                foreach (var txn in transactions)
+                var transactionDto = new TransactionInputDto
                 {
-                    Console.WriteLine($"| {txn.Date:yyyyMMdd} | {txn.TransactionId} | {txn.Type} | {txn.Amount,7:F2} |");
-                }
+                    Date = DateTime.ParseExact(parts[0], "yyyyMMdd", null),
+                    AccountNumber = parts[1],
+                    Type = parts[2].ToUpper() == "D" ? TransactionType.D : TransactionType.W,
+                    Amount = decimal.Parse(parts[3])
+                };
+
+                _bankingService.ProcessTransaction(transactionDto.AccountNumber, transactionDto.Date, transactionDto.Type, transactionDto.Amount);
+                Console.WriteLine("Transaction processed successfully.");
             }
             catch (Exception ex)
             {
@@ -102,12 +92,11 @@ namespace AwesomeGICBank.Application
 
         private void DefineInterestRule()
         {
-            Console.WriteLine("Please enter interest rules details in <Date> <RuleId> <Rate in %> format (or enter blank to go back to main menu):");
+            Console.WriteLine("Enter interest rule <Date YYYYMMDD> <RuleId> <Rate %>:");
             Console.Write("> ");
             var input = Console.ReadLine();
 
-            if (string.IsNullOrWhiteSpace(input))
-                return;
+            if (string.IsNullOrWhiteSpace(input)) return;
 
             var parts = input.Split(' ');
             if (parts.Length != 3)
@@ -118,21 +107,15 @@ namespace AwesomeGICBank.Application
 
             try
             {
-                var date = DateTime.ParseExact(parts[0], "yyyyMMdd", null);
-                var ruleId = parts[1];
-                var rate = decimal.Parse(parts[2]);
-
-                _interestRuleService.AddOrUpdateInterestRule(date, ruleId, rate);
-                Console.WriteLine("Interest rule added/updated successfully.");
-
-                // Display all interest rules
-                var rules = _interestRuleService.GetAllInterestRules();
-                Console.WriteLine("Interest rules:");
-                Console.WriteLine("| Date     | RuleId | Rate (%) |");
-                foreach (var rule in rules)
+                var interestRuleDto = new InterestRuleInputDto
                 {
-                    Console.WriteLine($"| {rule.Date:yyyyMMdd} | {rule.RuleId} | {rule.Rate,8:F2} |");
-                }
+                    Date = DateTime.ParseExact(parts[0], "yyyyMMdd", null),
+                    RuleId = parts[1],
+                    Rate = decimal.Parse(parts[2])
+                };
+
+                _interestRuleService.AddOrUpdateInterestRule(interestRuleDto.Date, interestRuleDto.RuleId, interestRuleDto.Rate);
+                Console.WriteLine("Interest rule added/updated successfully.");
             }
             catch (Exception ex)
             {
@@ -142,12 +125,11 @@ namespace AwesomeGICBank.Application
 
         private async Task PrintStatement()
         {
-            Console.WriteLine("Please enter account and month to generate the statement <Account> <Year><Month> (or enter blank to go back to main menu):");
+            Console.WriteLine("Enter account and statement period <Account> <YYYYMM>:");
             Console.Write("> ");
             var input = Console.ReadLine();
 
-            if (string.IsNullOrWhiteSpace(input))
-                return;
+            if (string.IsNullOrWhiteSpace(input)) return;
 
             var parts = input.Split(' ');
             if (parts.Length != 2)
@@ -158,47 +140,30 @@ namespace AwesomeGICBank.Application
 
             try
             {
-                var accountNumber = parts[0];
-                var yearMonth = parts[1];
-
-                // Validate the format of yearMonth
-                if (yearMonth.Length != 6 || !int.TryParse(yearMonth, out _))
+                var statementDto = new StatementRequestDto
                 {
-                    Console.WriteLine("Invalid YearMonth format.");
-                    return;
-                }
+                    AccountNumber = parts[0],
+                    Year = int.Parse(parts[1].Substring(0, 4)),
+                    Month = int.Parse(parts[1].Substring(4, 2))
+                };
 
-                var year = int.Parse(yearMonth.Substring(0, 4));
-                var month = int.Parse(yearMonth.Substring(4, 2));
+                var transactions = await _bankingService.GetTransactionsForAccount(statementDto.AccountNumber);
+                var interest = await _bankingService.CalculateInterest(statementDto.AccountNumber, statementDto.Year, statementDto.Month);
 
-                if (month < 1 || month > 12)
-                {
-                    Console.WriteLine("Invalid month value.");
-                    return;
-                }
-
-                var transactions = await _bankingService.GetTransactionsForAccount(accountNumber);
-
-                var interest = await _bankingService.CalculateInterest(accountNumber, year, month);
-
-                Console.WriteLine($"Account: {accountNumber}");
+                Console.WriteLine($"Statement for Account: {statementDto.AccountNumber}");
                 Console.WriteLine("| Date     | Txn Id      | Type | Amount | Balance |");
 
                 decimal balance = 0;
                 foreach (var txn in transactions)
                 {
-                    // Update balance depending on transaction type
                     balance += txn.Type == TransactionType.D ? txn.Amount : -txn.Amount;
-
-                    // Print transaction details
                     Console.WriteLine($"| {txn.Date:yyyyMMdd} | {txn.TransactionId} | {txn.Type} | {txn.Amount,7:F2} | {balance,7:F2} |");
                 }
 
-                // Apply interest after all transactions
                 if (interest > 0.0m)
                 {
                     balance += interest;
-                    Console.WriteLine($"| {new DateTime(year, month, DateTime.DaysInMonth(year, month)):yyyyMMdd} |             | I    | {interest,7:F2} | {balance,7:F2} |");
+                    Console.WriteLine($"| {new DateTime(statementDto.Year, statementDto.Month, DateTime.DaysInMonth(statementDto.Year, statementDto.Month)):yyyyMMdd} |             | I    | {interest,7:F2} | {balance,7:F2} |");
                 }
             }
             catch (Exception ex)
