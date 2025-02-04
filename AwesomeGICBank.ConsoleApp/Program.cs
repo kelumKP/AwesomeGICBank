@@ -1,21 +1,13 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using AwesomeGICBank.Application;
-using AwesomeGICBank.Infrastructure.Repositories;
-using AwesomeGICBank.Infrastructure;
-using AwesomeGICBank.Application.Interfaces;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Set up the DI container
+        // Set up the DI container using the extension method
         var serviceProvider = new ServiceCollection()
-            .AddSingleton<IAccountRepository, AccountRepository>()
-            .AddSingleton<IInterestRuleRepository, InterestRuleRepository>()
-            .AddSingleton<ITransactionRepository, TransactionRepository>()
-            .AddSingleton<IBankingService, BankingService>()
-            .AddSingleton<IInterestRuleService, InterestRuleService>()
-            .AddSingleton<BankingApplicationService>()
+            .AddAwesomeGICBankServices() // Call the extension method to register all dependencies
             .BuildServiceProvider();
 
         // Resolve the BankingApplicationService from the DI container
