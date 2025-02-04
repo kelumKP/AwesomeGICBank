@@ -68,8 +68,8 @@ Welcome to the **AwesomeGIC Bank Console Application**! This application is a si
 - **AwesomeGICBank.ConsoleApp:** The main console application.
   - `Program.cs`: Entry point of the application.
 
-- **AwesomeGICBank.Application:** Contains the core business logic.
-  - `Services`: Business services like `BankingService` and `InterestRuleService`.
+- **AwesomeGICBank.Application:** Contains the core business logic and Application logic.
+  - `Services`: Business services like `BankingService` , `InterestRuleService` and Application services like `BankingApplicationService`.
 
 - **AwesomeGICBank.Core:** Contains the core entities.
   - `Entities`: Domain entities like `Account`, `Transaction`, and `InterestRule`.
