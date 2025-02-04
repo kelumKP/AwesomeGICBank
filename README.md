@@ -95,7 +95,9 @@ The project includes unit tests for the core services. To run the tests:
 
 
 ### Database
-The application uses SQLite for data persistence. The database file (awesomegicbank.db) is automatically created in the project directory when the application is first run.
+The application uses SQLite for data persistence. The database file (`awesomegicbank.db`) is automatically created in the project directory when the application is first run.
+
+for an example in order to add first transaction for `AC001` bank account can use `20230626 AC001 D 100.00`
 
 
 ### Contributing
