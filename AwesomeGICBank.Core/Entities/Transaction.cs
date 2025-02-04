@@ -12,17 +12,21 @@ namespace AwesomeGICBank.Core.Entities
         public string TransactionId { get; }
         public TransactionType Type { get; }
         public decimal Amount { get; }
-        public decimal EODBalance { get; } // New property
+        public decimal EODBalance { get; }
 
-        public Transaction(DateTime date, TransactionType type, decimal amount, decimal eodBalance)
+        // Modify constructor to accept TransactionId as parameter
+        public Transaction(string transactionId, DateTime date, TransactionType type, decimal amount, decimal eodBalance)
         {
+            TransactionId = transactionId; // Set the TransactionId from DB
             Date = date;
             Type = type;
             Amount = amount;
             EODBalance = eodBalance;
-            TransactionId = $"{date:yyyyMMdd}-{Guid.NewGuid().ToString("N").Substring(0, 2)}";
         }
     }
+
+
+
 
     public enum TransactionType
     {

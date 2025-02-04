@@ -16,7 +16,47 @@ namespace AwesomeGICBank.Infrastructure.Repositories
             InitializeDatabase();
         }
 
-        public Task<List<Transaction>> GetAllTransactionsForAccount(string accountNumber, DateTime startDate, DateTime endDate)
+        public Task<List<Transaction>> GetAllTransactionsForAccount(string accountNumber)
+        {
+            var transactions = new List<Transaction>();
+            using (var connection = new SqliteConnection(ConnectionString))
+            {
+                connection.Open();
+                var command = connection.CreateCommand();
+                command.CommandText = @"
+        SELECT TransactionId, Date AS [Date], Type AS [Type], Amount AS [Amount], EODBalance AS [Balance]
+        FROM Transactions
+        WHERE AccountNumber = @AccountNumber
+        ORDER BY Date";
+
+                command.Parameters.AddWithValue("@AccountNumber", accountNumber);
+
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read()) // No need for async here
+                    {
+                        var transactionId = reader.GetString(reader.GetOrdinal("TransactionId"));
+                        var date = DateTime.ParseExact(reader.GetString(reader.GetOrdinal("Date")), "yyyyMMdd", null);
+                        var typeString = reader.GetString(reader.GetOrdinal("Type"));
+                        var amount = reader.GetDecimal(reader.GetOrdinal("Amount"));
+                        var eodBalance = reader.GetDecimal(reader.GetOrdinal("Balance"));
+
+                        // Ensure the type is set correctly
+                        TransactionType type = typeString == "D" ? TransactionType.D : TransactionType.W;
+
+                        // Pass the fetched TransactionId to the Transaction constructor
+                        transactions.Add(new Transaction(transactionId, date, type, amount, eodBalance));
+                    }
+                }
+            }
+
+            return Task.FromResult(transactions); // Wrap the result in Task
+        }
+
+
+
+
+        public Task<List<Transaction>> GetAllTransactionsForAccountPeriod(string accountNumber, DateTime startDate, DateTime endDate)
         {
             var transactions = new List<Transaction>();
             using (var connection = new SqliteConnection(ConnectionString))
@@ -45,7 +85,7 @@ namespace AwesomeGICBank.Infrastructure.Repositories
 
                         TransactionType type = typeString == "D" ? TransactionType.D : TransactionType.W;
 
-                        transactions.Add(new Transaction(date, type, amount, eodBalance));
+                        transactions.Add(new Transaction(transactionId, date, type, amount, eodBalance));
                     }
                 }
             }

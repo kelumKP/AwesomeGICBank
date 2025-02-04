@@ -173,10 +173,7 @@ namespace AwesomeGICBank.ConsoleApp
                     return;
                 }
 
-                var transactions = bankingService.GetAccountTransactions(accountNumber)
-                                                  .Where(t => t.Date.Year == year && t.Date.Month == month)
-                                                  .OrderBy(t => t.Date)
-                                                  .ToList();
+                var transactions = await bankingService.GetTransactionsForAccount(accountNumber);
 
                 var interest = await bankingService.CalculateInterest(accountNumber, year, month);
 

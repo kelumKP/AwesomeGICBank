@@ -44,6 +44,15 @@ namespace AwesomeGICBank.Core.Services
             return _accountRepository.GetTransactionsForAccount(accountNumber);
         }
 
+        public async Task<List<Transaction>> GetTransactionsForAccount(string accountNumber)
+        {
+            // Call the GetAllTransactionsForAccount method from the TransactionRepository
+            var transactions = await _transactionRepository.GetAllTransactionsForAccount(accountNumber);
+
+            // Return the list of transactions
+            return transactions;
+        }
+
         public async Task<decimal> CalculateInterest(string accountNumber, int year, int month)
         {
             try
@@ -106,7 +115,7 @@ namespace AwesomeGICBank.Core.Services
             DateTime endDate = startDate.AddMonths(1).AddDays(-1);
 
             // Await the asynchronous method
-            var transactions = await _transactionRepository.GetAllTransactionsForAccount(accountNumber, startDate, endDate);
+            var transactions = await _transactionRepository.GetAllTransactionsForAccountPeriod(accountNumber, startDate, endDate);
 
             var filteredTransactions = transactions
                 .Where(txn => txn.Date >= startDate && txn.Date <= endDate)

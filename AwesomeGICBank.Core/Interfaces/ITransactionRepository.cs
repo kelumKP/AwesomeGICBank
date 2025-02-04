@@ -6,6 +6,7 @@ namespace AwesomeGICBank.Core.Interfaces
 {
     public interface ITransactionRepository
     {
-        Task<List<Transaction>> GetAllTransactionsForAccount(string accountNumber, DateTime startDate, DateTime endDate);
+        Task<List<Transaction>> GetAllTransactionsForAccount(string accountNumber);
+        Task<List<Transaction>> GetAllTransactionsForAccountPeriod(string accountNumber, DateTime startDate, DateTime endDate);
     }
 }

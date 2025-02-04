@@ -172,7 +172,7 @@ namespace AwesomeGICBank.Infrastructure.Repositories
                         // Convert the string type to TransactionType enum
                         TransactionType type = typeString == "D" ? TransactionType.D : TransactionType.W;
 
-                        transactions.Add(new Transaction(date, type, amount, eodBalance));
+                        transactions.Add(new Transaction(transactionId, date, type, amount, eodBalance));
                     }
                 }
             }
