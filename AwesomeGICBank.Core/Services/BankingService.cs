@@ -22,22 +22,25 @@ namespace AwesomeGICBank.Core.Services
         {
             var account = _accountRepository.FindOrCreateAccount(accountNumber);
 
+            if (amount <= 0)
+                throw new ArgumentException("Deposit amount must be greater than zero.");
+
             if (type == TransactionType.D)
             {
-                account.Deposit(amount, date); // Add the amount to the balance
+                account.Deposit(amount, date);
             }
             else if (type == TransactionType.W)
             {
-                account.Withdraw(amount, date); // Subtract the amount from the balance
+                account.Withdraw(amount, date);
             }
             else
             {
                 throw new ArgumentException("Invalid transaction type. Use 'D' for deposit or 'W' for withdrawal.");
             }
 
-            // Save the updated account balance and transaction
             _accountRepository.AddTransaction(accountNumber, date, type, amount);
         }
+
 
         public List<Transaction> GetAccountTransactions(string accountNumber)
         {

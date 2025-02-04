@@ -53,13 +53,15 @@ namespace AwesomeGICBank.Infrastructure.Repositories
                     if (reader.Read())
                     {
                         var account = new Account(reader.GetString(0));
-                        account.Deposit(reader.GetDecimal(1), DateTime.Now); // Set initial balance
+                        account.SetBalance(reader.GetDecimal(1)); // Set initial balance using SetBalance
                         return account;
                     }
                 }
             }
-            return null;
+            return null; // Return null if account not found
         }
+
+
 
         public Account FindOrCreateAccount(string accountNumber)
         {

@@ -12,13 +12,18 @@ public class Account
         Balance = 0;
     }
 
+    // Add a method to set the balance (can be used when initializing from DB)
+    public void SetBalance(decimal balance)
+    {
+        Balance = balance;
+    }
+
     public void Deposit(decimal amount, DateTime date)
     {
         if (amount <= 0)
             throw new ArgumentException("Deposit amount must be greater than zero.");
 
-        Balance += amount; // Add the amount to the balance
-        // Create a new transaction with the current balance as EODBalance
+        Balance += amount;
         Transactions.Add(new Transaction(null, date, TransactionType.D, amount, Balance));
     }
 
@@ -30,8 +35,8 @@ public class Account
         if (Balance < amount)
             throw new InvalidOperationException("Insufficient balance.");
 
-        Balance -= amount; // Subtract the amount from the balance
-        // Create a new transaction with the current balance as EODBalance
+        Balance -= amount;
         Transactions.Add(new Transaction(null, date, TransactionType.W, amount, Balance));
     }
 }
+
