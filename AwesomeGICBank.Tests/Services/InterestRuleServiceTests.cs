@@ -1,26 +1,26 @@
-﻿// AwesomeGICBank.Tests/InterestRuleServiceTests.cs
+﻿using Moq;
 using NUnit.Framework;
 using AwesomeGICBank.Core.Services;
 using AwesomeGICBank.Entities;
-using AwesomeGICBank.Infrastructure.Repositories;
 using AwesomeGICBank.Core.Interfaces;
-using SQLitePCL;
+using System;
+using System.Collections.Generic;
 
 namespace AwesomeGICBank.Tests.Services
 {
     public class InterestRuleServiceTests
     {
         private InterestRuleService _interestRuleService;
-        private InterestRuleRepository _interestRuleRepository;
+        private Mock<IInterestRuleRepository> _mockInterestRuleRepository;
 
         [SetUp]
         public void Setup()
         {
-            // Initialize SQLite
-            Batteries.Init();
+            // Mock the IInterestRuleRepository
+            _mockInterestRuleRepository = new Mock<IInterestRuleRepository>();
 
-            _interestRuleRepository = new InterestRuleRepository();
-            _interestRuleService = new InterestRuleService(_interestRuleRepository);
+            // Initialize the InterestRuleService with the mocked repository
+            _interestRuleService = new InterestRuleService(_mockInterestRuleRepository.Object);
         }
 
         [Test]
@@ -30,12 +30,12 @@ namespace AwesomeGICBank.Tests.Services
             var ruleId = "RULE03";
             var rate = 2.20m;
 
+            // Act: Call the method under test
             _interestRuleService.AddOrUpdateInterestRule(date, ruleId, rate);
 
-            var rules = _interestRuleService.GetAllInterestRules();
-            Assert.AreEqual(1, rules.Count);
-            Assert.AreEqual(ruleId, rules[0].RuleId);
-            Assert.AreEqual(rate, rules[0].Rate);
+            // Assert that AddOrUpdateRule was called once with the correct rule
+            _mockInterestRuleRepository
+                .Verify(r => r.AddOrUpdateRule(It.Is<InterestRule>(ir => ir.RuleId == ruleId && ir.Rate == rate)), Times.Once);
         }
 
         [Test]
@@ -45,6 +45,7 @@ namespace AwesomeGICBank.Tests.Services
             var ruleId = "RULE03";
             var rate = 101.00m; // Invalid rate
 
+            // Act and Assert: Ensure an exception is thrown for invalid rate
             Assert.Throws<ArgumentException>(() =>
                 _interestRuleService.AddOrUpdateInterestRule(date, ruleId, rate));
         }
