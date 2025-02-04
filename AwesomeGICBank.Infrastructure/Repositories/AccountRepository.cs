@@ -153,10 +153,10 @@ namespace AwesomeGICBank.Infrastructure.Repositories
                 connection.Open();
                 var command = connection.CreateCommand();
                 command.CommandText = @"
-        SELECT TransactionId, Date, Type, Amount, EODBalance 
-        FROM Transactions 
-        WHERE AccountNumber = @AccountNumber 
-        ORDER BY Date";
+            SELECT TransactionId, Date, Type, Amount, EODBalance 
+            FROM Transactions 
+            WHERE AccountNumber = @AccountNumber 
+            ORDER BY Date";
                 command.Parameters.AddWithValue("@AccountNumber", accountNumber);
 
                 using (var reader = command.ExecuteReader())
@@ -165,15 +165,14 @@ namespace AwesomeGICBank.Infrastructure.Repositories
                     {
                         var transactionId = reader.GetString(0);
                         var date = DateTime.ParseExact(reader.GetString(1), "yyyyMMdd", null);
-                        var typeString = reader.GetString(2); // "Deposit" or "Withdrawal"
+                        var typeString = reader.GetString(2); // "D" for Deposit or "W" for Withdrawal
                         var amount = reader.GetDecimal(3);
-                        var eodBalance = reader.GetDecimal(4); // Read EODBalance
+                        var eodBalance = reader.GetDecimal(4); // EODBalance from the database
 
                         // Convert the string type to TransactionType enum
                         TransactionType type = typeString == "D" ? TransactionType.D : TransactionType.W;
 
                         transactions.Add(new Transaction(date, type, amount, eodBalance));
-
                     }
                 }
             }

@@ -1,6 +1,7 @@
 ﻿using AwesomeGICBank.Core.Entities;
 using AwesomeGICBank.Core.Interfaces;
 using System.Linq;
+using System.Security.Principal;
 
 namespace AwesomeGICBank.Core.Services
 {
@@ -8,11 +9,13 @@ namespace AwesomeGICBank.Core.Services
     {
         private readonly IAccountRepository _accountRepository;
         private readonly IInterestRuleRepository _interestRuleRepository;
+        private readonly ITransactionRepository _transactionRepository;
 
-        public BankingService(IAccountRepository accountRepository, IInterestRuleRepository interestRuleRepository)
+        public BankingService(IAccountRepository accountRepository, IInterestRuleRepository interestRuleRepository, ITransactionRepository transactionRepository)
         {
             _accountRepository = accountRepository;
             _interestRuleRepository = interestRuleRepository;
+            _transactionRepository = transactionRepository;
         }
 
         public void ProcessTransaction(string accountNumber, DateTime date, TransactionType type, decimal amount)
@@ -41,54 +44,155 @@ namespace AwesomeGICBank.Core.Services
             return _accountRepository.GetTransactionsForAccount(accountNumber);
         }
 
-        public decimal CalculateInterest(string accountNumber, int year, int month)
+        public async Task<decimal> CalculateInterest(string accountNumber, int year, int month)
         {
-            var account = _accountRepository.FindAccount(accountNumber);
-            if (account == null)
-                throw new ArgumentException("Account not found.");
-
-            var rules = _interestRuleRepository.GetAllRules()
-                                              .OrderBy(r => r.Date)
-                                              .ToList();
-
-            var startDate = new DateTime(year, month, 1);
-            var endDate = startDate.AddMonths(1).AddDays(-1);
-
-            decimal totalInterest = 0;
-            var currentDate = startDate;
-            var currentBalance = account.Transactions
-                                       .Where(t => t.Date < startDate)
-                                       .Sum(t => t.Type == TransactionType.D ? t.Amount : -t.Amount);
-
-            while (currentDate <= endDate)
+            try
             {
-                // Apply transactions for the current day
-                var transactionsForDay = account.Transactions
-                                               .Where(t => t.Date.Date == currentDate.Date)
-                                               .OrderBy(t => t.Date)
-                                               .ToList();
+                var interestForMonth = await GetApplicableInterestPeriods(accountNumber, year, month);
+                decimal totalAnnualizedInterest = interestForMonth.Sum(x => (decimal)x.Annualized_Interest);
+                return totalAnnualizedInterest / 365;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error calculating interest: {ex.Message}");
+                return 0.0m;  // Return 0 if there's an error
+            }
+        }
 
-                foreach (var txn in transactionsForDay)
+        public List<dynamic> GetApplicableRules(string accountNumber, int year, int month)
+        {
+            // Simulate the interest rules data
+            var rules = _interestRuleRepository.GetAllRules();
+
+            // Get the start and end date of the selected month
+            DateTime startDate = new DateTime(year, month, 1);
+            DateTime endDate = startDate.AddMonths(1).AddDays(-1); // Last day of the month
+
+            // List to hold applicable rules
+            var applicableRules = new List<dynamic>();
+
+            // Iterate through the rules to find applicable ones
+            for (int i = 0; i < rules.Count; i++)
+            {
+                var currentRule = rules[i];
+                DateTime ruleStartDate = currentRule.Date;
+
+                // Determine the rule's end date
+                DateTime ruleEndDate = (i + 1 < rules.Count) ? rules[i + 1].Date.AddDays(-1) : endDate;
+
+                // Calculate the intersection between the rule and the selected month
+                DateTime intersectionStart = ruleStartDate > startDate ? ruleStartDate : startDate;
+                DateTime intersectionEnd = ruleEndDate < endDate ? ruleEndDate : endDate;
+
+                // Only add the rule if there is an intersection with the selected month
+                if (intersectionStart <= intersectionEnd)
                 {
-                    if (txn.Type == TransactionType.D)
-                        currentBalance += txn.Amount;
-                    else
-                        currentBalance -= txn.Amount;
+                    applicableRules.Add(new
+                    {
+                        StartDate = intersectionStart,
+                        RuleId = currentRule.RuleId,
+                        Rate = currentRule.Rate,
+                        EndDate = intersectionEnd
+                    });
                 }
-
-                // Determine the applicable interest rule for the current day
-                var ruleForDay = rules.LastOrDefault(r => r.Date <= currentDate);
-                if (ruleForDay != null)
-                {
-                    // Calculate daily interest
-                    var dailyInterest = currentBalance * (ruleForDay.Rate / 100) / 365;
-                    totalInterest += dailyInterest;
-                }
-
-                currentDate = currentDate.AddDays(1);
             }
 
-            return Math.Round(totalInterest, 2, MidpointRounding.AwayFromZero);
+            return applicableRules;
+        }
+
+        public async Task<List<dynamic>> GetEODBalanceExistedPeriods(string accountNumber, int year, int month)
+        {
+            DateTime startDate = new DateTime(year, month, 1);
+            DateTime endDate = startDate.AddMonths(1).AddDays(-1);
+
+            // Await the asynchronous method
+            var transactions = await _transactionRepository.GetAllTransactionsForAccount(accountNumber, startDate, endDate);
+
+            var filteredTransactions = transactions
+                .Where(txn => txn.Date >= startDate && txn.Date <= endDate)
+                .OrderBy(txn => txn.Date)
+                .ToList();
+
+            var periods = new List<dynamic>();
+
+            if (!filteredTransactions.Any())
+            {
+                return periods;
+            }
+
+            var previousBalance = filteredTransactions[0].EODBalance;
+            var periodStartDate = startDate;
+
+            foreach (var txn in filteredTransactions)
+            {
+                if (txn.EODBalance != previousBalance)
+                {
+                    int days = (txn.Date - periodStartDate).Days;
+                    if (days > 0)
+                    {
+                        periods.Add(new
+                        {
+                            EODBalance = previousBalance,
+                            NumberOfDays = days,
+                            StartDate = periodStartDate,
+                            EndDate = txn.Date.AddDays(-1)
+                        });
+                    }
+
+                    periodStartDate = txn.Date;
+                    previousBalance = txn.EODBalance;
+                }
+            }
+
+            int finalDays = (endDate - periodStartDate).Days;
+            if (finalDays > 0)
+            {
+                periods.Add(new
+                {
+                    EODBalance = previousBalance,
+                    NumberOfDays = finalDays,
+                    StartDate = periodStartDate,
+                    EndDate = endDate
+                });
+            }
+
+            return periods;
+        }
+
+        public async Task<List<dynamic>> GetApplicableInterestPeriods(string accountNumber, int year, int month)
+        {
+            var applicableRules = GetApplicableRules(accountNumber, year, month);
+            var eodBalanceExistedPeriods = await GetEODBalanceExistedPeriods(accountNumber, year, month); // Await the Task
+
+            var annualizedInterestWithPeriods = new List<dynamic>();
+
+            foreach (var rule in applicableRules)
+            {
+                foreach (var balance in eodBalanceExistedPeriods)
+                {
+                    DateTime start = rule.StartDate > balance.StartDate ? rule.StartDate : balance.StartDate;
+                    DateTime end = rule.EndDate < balance.EndDate ? rule.EndDate : balance.EndDate;
+
+                    if (start <= end)
+                    {
+                        int numberOfDays = (end - start).Days + 1;
+                        decimal annualizedInterest = balance.EODBalance * (rule.Rate / 100) * numberOfDays; // Apply formula
+
+                        annualizedInterestWithPeriods.Add(new
+                        {
+                            StartDate = start,
+                            RuleId = rule.RuleId,
+                            Rate = rule.Rate,
+                            EndDate = end,
+                            EODBalance = balance.EODBalance,
+                            NumberOfDays = numberOfDays,
+                            Annualized_Interest = Math.Round(annualizedInterest, 2) // Round to 2 decimal places
+                        });
+                    }
+                }
+            }
+
+            return annualizedInterestWithPeriods;
         }
     }
 }

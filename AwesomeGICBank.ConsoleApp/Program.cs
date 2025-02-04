@@ -16,7 +16,8 @@ namespace AwesomeGICBank.ConsoleApp
 
             var accountRepository = new AccountRepository();
             var interestRuleRepository = new InterestRuleRepository();
-            var bankingService = new BankingService(accountRepository, interestRuleRepository);
+            var transactionRepository = new TransactionRepository();
+            var bankingService = new BankingService(accountRepository, interestRuleRepository, transactionRepository);
             var interestRuleService = new InterestRuleService(interestRuleRepository);
 
             while (true)
@@ -135,7 +136,7 @@ namespace AwesomeGICBank.ConsoleApp
             }
         }
 
-        static void PrintStatement(BankingService bankingService)
+        static async Task PrintStatement(BankingService bankingService)
         {
             Console.WriteLine("Please enter account and month to generate the statement <Account> <Year><Month> (or enter blank to go back to main menu):");
             Console.Write("> ");
@@ -155,26 +156,45 @@ namespace AwesomeGICBank.ConsoleApp
             {
                 var accountNumber = parts[0];
                 var yearMonth = parts[1];
+
+                // Validate the format of yearMonth
+                if (yearMonth.Length != 6 || !int.TryParse(yearMonth, out _))
+                {
+                    Console.WriteLine("Invalid YearMonth format.");
+                    return;
+                }
+
                 var year = int.Parse(yearMonth.Substring(0, 4));
                 var month = int.Parse(yearMonth.Substring(4, 2));
 
-                var transactions = bankingService.GetAccountTransactions(accountNumber)
-                                                .Where(t => t.Date.Year == year && t.Date.Month == month)
-                                                .OrderBy(t => t.Date)
-                                                .ToList();
+                if (month < 1 || month > 12)
+                {
+                    Console.WriteLine("Invalid month value.");
+                    return;
+                }
 
-                var interest = bankingService.CalculateInterest(accountNumber, year, month);
+                var transactions = bankingService.GetAccountTransactions(accountNumber)
+                                                  .Where(t => t.Date.Year == year && t.Date.Month == month)
+                                                  .OrderBy(t => t.Date)
+                                                  .ToList();
+
+                var interest = await bankingService.CalculateInterest(accountNumber, year, month);
 
                 Console.WriteLine($"Account: {accountNumber}");
                 Console.WriteLine("| Date     | Txn Id      | Type | Amount | Balance |");
+
                 decimal balance = 0;
                 foreach (var txn in transactions)
                 {
+                    // Update balance depending on transaction type
                     balance += txn.Type == TransactionType.D ? txn.Amount : -txn.Amount;
+
+                    // Print transaction details
                     Console.WriteLine($"| {txn.Date:yyyyMMdd} | {txn.TransactionId} | {txn.Type} | {txn.Amount,7:F2} | {balance,7:F2} |");
                 }
 
-                if (interest > 0)
+                // Apply interest after all transactions
+                if (interest > 0.0m)
                 {
                     balance += interest;
                     Console.WriteLine($"| {new DateTime(year, month, DateTime.DaysInMonth(year, month)):yyyyMMdd} |             | I    | {interest,7:F2} | {balance,7:F2} |");
