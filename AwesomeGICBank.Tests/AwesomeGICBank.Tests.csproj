@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AwesomeGICBank.Application\AwesomeGICBank.Application.csproj" />
     <ProjectReference Include="..\AwesomeGICBank.Core\AwesomeGICBank.Core.csproj" />
     <ProjectReference Include="..\AwesomeGICBank.Infrastructure\AwesomeGICBank.Infrastructure.csproj" />
   </ItemGroup>

@@ -1,5 +1,4 @@
 ﻿using AwesomeGICBank.Core.Entities;
-using AwesomeGICBank.Core.Interfaces;
 using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;

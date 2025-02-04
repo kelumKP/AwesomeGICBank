@@ -1,5 +1,4 @@
-﻿using AwesomeGICBank.Core.Interfaces;
-using AwesomeGICBank.Entities;
+﻿using AwesomeGICBank.Entities;
 using Microsoft.Data.Sqlite;
 
 namespace AwesomeGICBank.Infrastructure.Repositories

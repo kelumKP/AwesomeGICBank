@@ -1,10 +1,10 @@
 ﻿using Moq;
 using NUnit.Framework;
-using AwesomeGICBank.Core.Services;
 using AwesomeGICBank.Entities;
-using AwesomeGICBank.Core.Interfaces;
 using System;
 using System.Collections.Generic;
+using AwesomeGICBank.Application;
+using AwesomeGICBank.Infrastructure;
 
 namespace AwesomeGICBank.Tests.Services
 {

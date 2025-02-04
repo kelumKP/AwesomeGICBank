@@ -1,9 +1,9 @@
 ﻿using AwesomeGICBank.Core.Entities;
-using AwesomeGICBank.Core.Interfaces;
+using AwesomeGICBank.Infrastructure;
 using System.Linq;
 using System.Security.Principal;
 
-namespace AwesomeGICBank.Core.Services
+namespace AwesomeGICBank.Application
 {
     public class BankingService
     {

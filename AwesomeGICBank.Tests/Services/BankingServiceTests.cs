@@ -3,10 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AwesomeGICBank.Core.Entities;
-using AwesomeGICBank.Core.Interfaces;
-using AwesomeGICBank.Core.Services;
 using NUnit.Framework;
 using AwesomeGICBank.Entities;
+using AwesomeGICBank.Infrastructure;
+using AwesomeGICBank.Application;
 
 namespace AwesomeGICBank.Tests.Services
 {

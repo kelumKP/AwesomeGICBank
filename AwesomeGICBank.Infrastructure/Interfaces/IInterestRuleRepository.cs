@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AwesomeGICBank.Core.Interfaces
+namespace AwesomeGICBank.Infrastructure
 {
     public interface IInterestRuleRepository
     {

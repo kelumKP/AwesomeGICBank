@@ -1,5 +1,4 @@
 ﻿using AwesomeGICBank.Core.Entities;
-using AwesomeGICBank.Core.Services;
 using AwesomeGICBank.Infrastructure.Repositories;
 using SQLitePCL;
 using AwesomeGICBank.Application.DTOs;

@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace AwesomeGICBank.Core.Interfaces
+namespace AwesomeGICBank.Infrastructure
 {
     public interface IAccountRepository
     {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using AwesomeGICBank.Core.Entities; // Make sure to include this namespace
 
-namespace AwesomeGICBank.Core.Interfaces
+namespace AwesomeGICBank.Infrastructure
 {
     public interface ITransactionRepository
     {
