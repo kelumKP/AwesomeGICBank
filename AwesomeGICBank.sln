@@ -17,6 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README_INSTRUCTIONS.md = README_INSTRUCTIONS.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AwesomeGICBank.Application", "AwesomeGICBank.Application\AwesomeGICBank.Application.csproj", "{35BC6796-551D-4157-8CE0-8F6D807FC8E8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{9B590AB8-1A12-42C5-AE73-7EDCF371AD56}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9B590AB8-1A12-42C5-AE73-7EDCF371AD56}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9B590AB8-1A12-42C5-AE73-7EDCF371AD56}.Release|Any CPU.Build.0 = Release|Any CPU
+		{35BC6796-551D-4157-8CE0-8F6D807FC8E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35BC6796-551D-4157-8CE0-8F6D807FC8E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35BC6796-551D-4157-8CE0-8F6D807FC8E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35BC6796-551D-4157-8CE0-8F6D807FC8E8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
