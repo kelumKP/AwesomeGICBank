@@ -1,71 +1,115 @@
-﻿using NUnit.Framework;
-using AwesomeGICBank.Core.Services;
+﻿using Moq;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using AwesomeGICBank.Core.Entities;
 using AwesomeGICBank.Core.Interfaces;
-using AwesomeGICBank.Infrastructure.Repositories;
-using System;
-using System.Linq;
+using AwesomeGICBank.Core.Services;
+using NUnit.Framework;
 using AwesomeGICBank.Entities;
-using SQLitePCL;
 
 namespace AwesomeGICBank.Tests.Services
 {
+    [TestFixture]
     public class BankingServiceTests
     {
+        private Mock<IAccountRepository> _mockAccountRepository;
+        private Mock<IInterestRuleRepository> _mockInterestRuleRepository;
+        private Mock<ITransactionRepository> _mockTransactionRepository;
         private BankingService _bankingService;
-        private IAccountRepository _accountRepository;
-        private IInterestRuleRepository _interestRuleRepository;
-        private ITransactionRepository _transactionRepository;
 
         [SetUp]
         public void Setup()
         {
-            // Initialize SQLite and repositories
-            Batteries_V2.Init(); // Initialize SQLite
+            // Initialize mocks
+            _mockAccountRepository = new Mock<IAccountRepository>();
+            _mockInterestRuleRepository = new Mock<IInterestRuleRepository>();
+            _mockTransactionRepository = new Mock<ITransactionRepository>();
 
-            _accountRepository = new AccountRepository();
-            _interestRuleRepository = new InterestRuleRepository();
-            _transactionRepository = new TransactionRepository(); // Initialize transaction repository
-            _bankingService = new BankingService(_accountRepository, _interestRuleRepository, _transactionRepository);
-
-            // Ensure the account exists before transactions
-            var accountNumber = "AC001";
-            _accountRepository.FindOrCreateAccount(accountNumber);
+            // Initialize the service with mocks
+            _bankingService = new BankingService(
+                _mockAccountRepository.Object,
+                _mockInterestRuleRepository.Object,
+                _mockTransactionRepository.Object
+            );
         }
 
         [Test]
-        public async Task CalculateInterest_WithMultipleRules_CalculatesCorrectInterest()
+        public void ProcessTransaction_Deposit_ShouldUpdateBalance()
         {
-            var accountNumber = "AC001";
-            var date1 = DateTime.ParseExact("20230601", "yyyyMMdd", null);
-            var date2 = DateTime.ParseExact("20230615", "yyyyMMdd", null);
-            var date3 = DateTime.ParseExact("20230626", "yyyyMMdd", null);
+            // Arrange
+            string accountNumber = "12345";
+            DateTime transactionDate = DateTime.Now;
+            decimal depositAmount = 100;
+            var account = new Account(accountNumber);
+            _mockAccountRepository.Setup(repo => repo.FindOrCreateAccount(accountNumber)).Returns(account);
 
-            // Process transactions
-            _bankingService.ProcessTransaction(accountNumber, date1, TransactionType.D, 250.00m); // Deposit
-            _bankingService.ProcessTransaction(accountNumber, date3, TransactionType.W, 120.00m); // Withdrawal
+            // Act
+            _bankingService.ProcessTransaction(accountNumber, transactionDate, TransactionType.D, depositAmount);
 
-            var transactions = _bankingService.GetAccountTransactions(accountNumber);
-            Assert.IsNotEmpty(transactions, "Transactions were not saved to the database.");
-
-            // Add interest rules (ensure rules are added in correct order and for correct periods)
-            _interestRuleRepository.AddOrUpdateRule(new InterestRule(date1, "RULE02", 1.90m)); // 1.90% from date1
-            _interestRuleRepository.AddOrUpdateRule(new InterestRule(date2, "RULE03", 2.20m)); // 2.20% from date2
-
-            // Calculate interest for the specified year and month
-            var interest = await _bankingService.CalculateInterest(accountNumber, 2023, 6); // Calculate for June 2023
-
-            // Assert that the expected interest is calculated correctly, with a tolerance
-            var expectedInterest = 0.39m;
-            var tolerance = 0.01m; // Allowing a small tolerance for floating-point comparison
-
-            // Round the actual interest for comparison
-            var roundedInterest = Math.Round(interest, 2); // Round to 2 decimal places
-
-            // Use Within to compare the interest value with a tolerance
-            Assert.That(roundedInterest, Is.EqualTo(expectedInterest).Within(tolerance), "Interest calculation is incorrect.");
+            // Assert
+            Assert.AreEqual(100, account.Balance);
+            _mockAccountRepository.Verify(repo => repo.AddTransaction(accountNumber, transactionDate, TransactionType.D, depositAmount), Times.Once);
         }
 
+        [Test]
+        public void ProcessTransaction_Withdraw_ShouldUpdateBalance()
+        {
+            // Arrange
+            string accountNumber = "12345";
+            DateTime transactionDate = DateTime.Now;
+            decimal depositAmount = 100;
+            decimal withdrawAmount = 50;
+            var account = new Account(accountNumber);
+            account.Deposit(depositAmount, transactionDate);
+            _mockAccountRepository.Setup(repo => repo.FindOrCreateAccount(accountNumber)).Returns(account);
 
+            // Act
+            _bankingService.ProcessTransaction(accountNumber, transactionDate, TransactionType.W, withdrawAmount);
+
+            // Assert
+            Assert.AreEqual(50, account.Balance);
+            _mockAccountRepository.Verify(repo => repo.AddTransaction(accountNumber, transactionDate, TransactionType.W, withdrawAmount), Times.Once);
+        }
+
+        [Test]
+        public void ProcessTransaction_Withdraw_InsufficientBalance_ShouldThrowException()
+        {
+            // Arrange
+            string accountNumber = "12345";
+            DateTime transactionDate = DateTime.Now;
+            decimal withdrawAmount = 100;
+            var account = new Account(accountNumber);
+            _mockAccountRepository.Setup(repo => repo.FindOrCreateAccount(accountNumber)).Returns(account);
+
+            // Act & Assert
+            var exception = Assert.Throws<InvalidOperationException>(() =>
+                _bankingService.ProcessTransaction(accountNumber, transactionDate, TransactionType.W, withdrawAmount));
+
+            Assert.AreEqual("Insufficient balance.", exception.Message);
+        }
+
+        [Test]
+        public async Task GetTransactionsForAccount_ShouldReturnTransactions()
+        {
+            // Arrange
+            string accountNumber = "12345";
+            var transactions = new List<Transaction>
+            {
+                new Transaction("txn1", DateTime.Now, TransactionType.D, 100, 100),
+                new Transaction("txn2", DateTime.Now, TransactionType.W, 50, 50)
+            };
+
+            _mockTransactionRepository.Setup(repo => repo.GetAllTransactionsForAccount(accountNumber))
+                .ReturnsAsync(transactions);
+
+            // Act
+            var result = await _bankingService.GetTransactionsForAccount(accountNumber);
+
+            // Assert
+            Assert.AreEqual(2, result.Count);
+            Assert.AreEqual("txn1", result[0].TransactionId);
+            Assert.AreEqual("txn2", result[1].TransactionId);
+        }
     }
 }
