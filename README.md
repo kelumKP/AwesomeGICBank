@@ -68,13 +68,15 @@ Welcome to the **AwesomeGIC Bank Console Application**! This application is a si
 - **AwesomeGICBank.ConsoleApp:** The main console application.
   - `Program.cs`: Entry point of the application.
 
-- **AwesomeGICBank.Core:** Contains the core business logic.
-  - `Entities`: Domain entities like `Account`, `Transaction`, and `InterestRule`.
-  - `Interfaces`: Repository interfaces.
+- **AwesomeGICBank.Application:** Contains the core business logic.
   - `Services`: Business services like `BankingService` and `InterestRuleService`.
+
+- **AwesomeGICBank.Core:** Contains the core entities.
+  - `Entities`: Domain entities like `Account`, `Transaction`, and `InterestRule`.
 
 - **AwesomeGICBank.Infrastructure:** Contains the data access layer.
   - `Repositories`: Repository implementations for `Account`, `Transaction`, and `InterestRule`.
+  - `Interfaces`: Repository interfaces.
 
 - **AwesomeGICBank.Tests:** Unit tests for the application.
   - `Services`: Tests for `BankingService` and `InterestRuleService`.
@@ -93,7 +95,6 @@ The project includes unit tests for the core services. To run the tests:
    ```bash
    dotnet test
 
-
 ### Database
 The application uses SQLite for data persistence. The database file (`awesomegicbank.db`) is automatically created in the project directory when the application is first run.
 
@@ -107,8 +108,8 @@ Contributions are welcome! Please fork the repository and submit a pull request 
 This project is licensed under the MIT License. See the LICENSE file for details.
 
 ### Acknowledgments
- - SQLitePCL for SQLite database access.
- - Moq for mocking in unit tests.
- - NUnit for unit testing.
+ - `SQLitePCL` for SQLite database access.
+ - `Moq` for mocking in unit tests.
+ - `NUnit` for unit testing.
 	
 Thank you for using AwesomeGIC Bank! We hope you find this application useful. If you have any questions or feedback, please feel free to reach out.
