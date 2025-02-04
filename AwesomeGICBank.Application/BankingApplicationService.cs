@@ -1,7 +1,9 @@
 ﻿using AwesomeGICBank.Core.Entities;
 using AwesomeGICBank.Infrastructure.Repositories;
-using SQLitePCL;
 using AwesomeGICBank.Application.DTOs;
+using System;
+using System.Threading.Tasks;
+using SQLitePCL;
 
 namespace AwesomeGICBank.Application
 {
@@ -80,7 +82,7 @@ namespace AwesomeGICBank.Application
                     Amount = decimal.Parse(parts[3])
                 };
 
-                _bankingService.ProcessTransaction(transactionDto.AccountNumber, transactionDto.Date, transactionDto.Type, transactionDto.Amount);
+                _bankingService.ProcessTransaction(transactionDto);
                 Console.WriteLine("Transaction processed successfully.");
             }
             catch (Exception ex)
@@ -113,7 +115,7 @@ namespace AwesomeGICBank.Application
                     Rate = decimal.Parse(parts[2])
                 };
 
-                _interestRuleService.AddOrUpdateInterestRule(interestRuleDto.Date, interestRuleDto.RuleId, interestRuleDto.Rate);
+                _interestRuleService.AddOrUpdateInterestRule(interestRuleDto);
                 Console.WriteLine("Interest rule added/updated successfully.");
             }
             catch (Exception ex)

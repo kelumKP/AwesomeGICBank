@@ -7,6 +7,7 @@ using NUnit.Framework;
 using AwesomeGICBank.Entities;
 using AwesomeGICBank.Infrastructure;
 using AwesomeGICBank.Application;
+using AwesomeGICBank.Application.DTOs;
 
 namespace AwesomeGICBank.Tests.Services
 {
@@ -44,8 +45,16 @@ namespace AwesomeGICBank.Tests.Services
             var account = new Account(accountNumber);
             _mockAccountRepository.Setup(repo => repo.FindOrCreateAccount(accountNumber)).Returns(account);
 
+            var transactionDto = new TransactionInputDto
+            {
+                AccountNumber = accountNumber,
+                Date = transactionDate,
+                Type = TransactionType.D,
+                Amount = depositAmount
+            };
+
             // Act
-            _bankingService.ProcessTransaction(accountNumber, transactionDate, TransactionType.D, depositAmount);
+            _bankingService.ProcessTransaction(transactionDto);
 
             // Assert
             Assert.AreEqual(100, account.Balance);
@@ -64,8 +73,16 @@ namespace AwesomeGICBank.Tests.Services
             account.Deposit(depositAmount, transactionDate);
             _mockAccountRepository.Setup(repo => repo.FindOrCreateAccount(accountNumber)).Returns(account);
 
+            var transactionDto = new TransactionInputDto
+            {
+                AccountNumber = accountNumber,
+                Date = transactionDate,
+                Type = TransactionType.W,
+                Amount = withdrawAmount
+            };
+
             // Act
-            _bankingService.ProcessTransaction(accountNumber, transactionDate, TransactionType.W, withdrawAmount);
+            _bankingService.ProcessTransaction(transactionDto);
 
             // Assert
             Assert.AreEqual(50, account.Balance);
@@ -82,9 +99,17 @@ namespace AwesomeGICBank.Tests.Services
             var account = new Account(accountNumber);
             _mockAccountRepository.Setup(repo => repo.FindOrCreateAccount(accountNumber)).Returns(account);
 
+            var transactionDto = new TransactionInputDto
+            {
+                AccountNumber = accountNumber,
+                Date = transactionDate,
+                Type = TransactionType.W,
+                Amount = withdrawAmount
+            };
+
             // Act & Assert
             var exception = Assert.Throws<InvalidOperationException>(() =>
-                _bankingService.ProcessTransaction(accountNumber, transactionDate, TransactionType.W, withdrawAmount));
+                _bankingService.ProcessTransaction(transactionDto));
 
             Assert.AreEqual("Insufficient balance.", exception.Message);
         }

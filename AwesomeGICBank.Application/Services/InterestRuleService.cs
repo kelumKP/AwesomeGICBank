@@ -1,10 +1,9 @@
 ﻿using AwesomeGICBank.Entities;
 using AwesomeGICBank.Infrastructure;
+using AwesomeGICBank.Application.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AwesomeGICBank.Application
 {
@@ -17,12 +16,12 @@ namespace AwesomeGICBank.Application
             _interestRuleRepository = interestRuleRepository;
         }
 
-        public void AddOrUpdateInterestRule(DateTime date, string ruleId, decimal rate)
+        public void AddOrUpdateInterestRule(InterestRuleInputDto inputDto)
         {
-            if (rate <= 0 || rate >= 100)
+            if (inputDto.Rate <= 0 || inputDto.Rate >= 100)
                 throw new ArgumentException("Interest rate must be greater than 0 and less than 100.");
 
-            var rule = new InterestRule(date, ruleId, rate);
+            var rule = new InterestRule(inputDto.Date, inputDto.RuleId, inputDto.Rate);
             _interestRuleRepository.AddOrUpdateRule(rule);
         }
 

@@ -1,7 +1,10 @@
 ﻿using AwesomeGICBank.Core.Entities;
 using AwesomeGICBank.Infrastructure;
+using AwesomeGICBank.Application.DTOs;
+using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Security.Principal;
+using System.Threading.Tasks;
 
 namespace AwesomeGICBank.Application
 {
@@ -18,29 +21,28 @@ namespace AwesomeGICBank.Application
             _transactionRepository = transactionRepository;
         }
 
-        public void ProcessTransaction(string accountNumber, DateTime date, TransactionType type, decimal amount)
+        public void ProcessTransaction(TransactionInputDto transactionDto)
         {
-            var account = _accountRepository.FindOrCreateAccount(accountNumber);
+            var account = _accountRepository.FindOrCreateAccount(transactionDto.AccountNumber);
 
-            if (amount <= 0)
-                throw new ArgumentException("Deposit amount must be greater than zero.");
+            if (transactionDto.Amount <= 0)
+                throw new ArgumentException("Transaction amount must be greater than zero.");
 
-            if (type == TransactionType.D)
+            if (transactionDto.Type == TransactionType.D)
             {
-                account.Deposit(amount, date);
+                account.Deposit(transactionDto.Amount, transactionDto.Date);
             }
-            else if (type == TransactionType.W)
+            else if (transactionDto.Type == TransactionType.W)
             {
-                account.Withdraw(amount, date);
+                account.Withdraw(transactionDto.Amount, transactionDto.Date);
             }
             else
             {
                 throw new ArgumentException("Invalid transaction type. Use 'D' for deposit or 'W' for withdrawal.");
             }
 
-            _accountRepository.AddTransaction(accountNumber, date, type, amount);
+            _accountRepository.AddTransaction(transactionDto.AccountNumber, transactionDto.Date, transactionDto.Type, transactionDto.Amount);
         }
-
 
         public List<Transaction> GetAccountTransactions(string accountNumber)
         {
@@ -49,10 +51,7 @@ namespace AwesomeGICBank.Application
 
         public async Task<List<Transaction>> GetTransactionsForAccount(string accountNumber)
         {
-            // Call the GetAllTransactionsForAccount method from the TransactionRepository
             var transactions = await _transactionRepository.GetAllTransactionsForAccount(accountNumber);
-
-            // Return the list of transactions
             return transactions;
         }
 
@@ -73,30 +72,21 @@ namespace AwesomeGICBank.Application
 
         public List<dynamic> GetApplicableRules(string accountNumber, int year, int month)
         {
-            // Simulate the interest rules data
             var rules = _interestRuleRepository.GetAllRules();
-
-            // Get the start and end date of the selected month
             DateTime startDate = new DateTime(year, month, 1);
-            DateTime endDate = startDate.AddMonths(1).AddDays(-1); // Last day of the month
+            DateTime endDate = startDate.AddMonths(1).AddDays(-1);
 
-            // List to hold applicable rules
             var applicableRules = new List<dynamic>();
 
-            // Iterate through the rules to find applicable ones
             for (int i = 0; i < rules.Count; i++)
             {
                 var currentRule = rules[i];
                 DateTime ruleStartDate = currentRule.Date;
-
-                // Determine the rule's end date
                 DateTime ruleEndDate = (i + 1 < rules.Count) ? rules[i + 1].Date.AddDays(-1) : endDate;
 
-                // Calculate the intersection between the rule and the selected month
                 DateTime intersectionStart = ruleStartDate > startDate ? ruleStartDate : startDate;
                 DateTime intersectionEnd = ruleEndDate < endDate ? ruleEndDate : endDate;
 
-                // Only add the rule if there is an intersection with the selected month
                 if (intersectionStart <= intersectionEnd)
                 {
                     applicableRules.Add(new
@@ -117,7 +107,6 @@ namespace AwesomeGICBank.Application
             DateTime startDate = new DateTime(year, month, 1);
             DateTime endDate = startDate.AddMonths(1).AddDays(-1);
 
-            // Await the asynchronous method
             var transactions = await _transactionRepository.GetAllTransactionsForAccountPeriod(accountNumber, startDate, endDate);
 
             var filteredTransactions = transactions
@@ -174,7 +163,7 @@ namespace AwesomeGICBank.Application
         public async Task<List<dynamic>> GetApplicableInterestPeriods(string accountNumber, int year, int month)
         {
             var applicableRules = GetApplicableRules(accountNumber, year, month);
-            var eodBalanceExistedPeriods = await GetEODBalanceExistedPeriods(accountNumber, year, month); // Await the Task
+            var eodBalanceExistedPeriods = await GetEODBalanceExistedPeriods(accountNumber, year, month);
 
             var annualizedInterestWithPeriods = new List<dynamic>();
 
@@ -188,7 +177,7 @@ namespace AwesomeGICBank.Application
                     if (start <= end)
                     {
                         int numberOfDays = (end - start).Days + 1;
-                        decimal annualizedInterest = balance.EODBalance * (rule.Rate / 100) * numberOfDays; // Apply formula
+                        decimal annualizedInterest = balance.EODBalance * (rule.Rate / 100) * numberOfDays;
 
                         annualizedInterestWithPeriods.Add(new
                         {
@@ -198,7 +187,7 @@ namespace AwesomeGICBank.Application
                             EndDate = end,
                             EODBalance = balance.EODBalance,
                             NumberOfDays = numberOfDays,
-                            Annualized_Interest = Math.Round(annualizedInterest, 2) // Round to 2 decimal places
+                            Annualized_Interest = Math.Round(annualizedInterest, 2)
                         });
                     }
                 }
