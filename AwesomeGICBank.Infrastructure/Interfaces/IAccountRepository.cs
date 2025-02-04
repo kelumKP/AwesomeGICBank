@@ -1,6 +1,4 @@
 ﻿using AwesomeGICBank.Core.Entities;
-using System;
-using System.Collections.Generic;
 
 namespace AwesomeGICBank.Infrastructure
 {

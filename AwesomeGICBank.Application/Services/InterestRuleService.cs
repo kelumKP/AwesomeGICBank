@@ -1,9 +1,6 @@
 ﻿using AwesomeGICBank.Entities;
 using AwesomeGICBank.Infrastructure;
 using AwesomeGICBank.Application.DTOs;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using AwesomeGICBank.Application.Interfaces;
 
 namespace AwesomeGICBank.Application

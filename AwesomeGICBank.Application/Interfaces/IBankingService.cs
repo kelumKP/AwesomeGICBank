@@ -1,8 +1,5 @@
 ﻿using AwesomeGICBank.Application.DTOs;
 using AwesomeGICBank.Core.Entities;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace AwesomeGICBank.Application.Interfaces
 {

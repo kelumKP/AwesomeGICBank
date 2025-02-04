@@ -1,10 +1,8 @@
 ﻿using Moq;
-using NUnit.Framework;
 using AwesomeGICBank.Entities;
 using AwesomeGICBank.Application;
 using AwesomeGICBank.Application.DTOs;
 using AwesomeGICBank.Infrastructure;
-using System;
 
 namespace AwesomeGICBank.Tests.Services
 {

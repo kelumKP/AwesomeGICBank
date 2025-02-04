@@ -1,9 +1,5 @@
 ﻿using AwesomeGICBank.Core.Entities;
-using AwesomeGICBank.Infrastructure.Repositories;
 using AwesomeGICBank.Application.DTOs;
-using System;
-using System.Threading.Tasks;
-using SQLitePCL;
 using AwesomeGICBank.Application.Interfaces;
 
 namespace AwesomeGICBank.Application

@@ -1,10 +1,5 @@
 ﻿using Moq;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using AwesomeGICBank.Core.Entities;
-using NUnit.Framework;
-using AwesomeGICBank.Entities;
 using AwesomeGICBank.Infrastructure;
 using AwesomeGICBank.Application;
 using AwesomeGICBank.Application.DTOs;

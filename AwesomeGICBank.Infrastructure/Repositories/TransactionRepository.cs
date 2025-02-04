@@ -1,8 +1,5 @@
 ﻿using AwesomeGICBank.Core.Entities;
 using Microsoft.Data.Sqlite;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace AwesomeGICBank.Infrastructure.Repositories
 {
