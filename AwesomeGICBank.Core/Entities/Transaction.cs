@@ -17,7 +17,7 @@ namespace AwesomeGICBank.Core.Entities
         // Modify constructor to accept TransactionId as parameter
         public Transaction(string transactionId, DateTime date, TransactionType type, decimal amount, decimal eodBalance)
         {
-            TransactionId = transactionId; // Set the TransactionId from DB
+            TransactionId = transactionId;
             Date = date;
             Type = type;
             Amount = amount;
@@ -29,7 +29,8 @@ namespace AwesomeGICBank.Core.Entities
 
 
     public enum TransactionType
-    {
+    {   
+        // "D" for Deposit or "W" for Withdrawal
         D,
         W
     }

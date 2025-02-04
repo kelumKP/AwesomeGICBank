@@ -24,14 +24,14 @@ Welcome to the **AwesomeGIC Bank Console Application**! This application is a si
 
 ### Prerequisites
 
-- [.NET SDK](https://dotnet.microsoft.com/download) installed on your machine.
+- [.NET SDK](https://dotnet.microsoft.com/download) installed on the machine.
 - SQLite (included in the project via `SQLitePCL`).
 
 ### Installation
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-repo/AwesomeGICBank.git
+   git clone https://github.com/kelumkp/AwesomeGICBank.git
 
 2. Navigate to the project directory:
    ```bash
@@ -99,7 +99,7 @@ The application uses SQLite for data persistence. The database file (awesomegicb
 
 
 ### Contributing
-Contributions are welcome! Please fork the repository and submit a pull request with your changes.
+Contributions are welcome! Please fork the repository and submit a pull request with the changes.
 
 ### License
 This project is licensed under the MIT License. See the LICENSE file for details.
