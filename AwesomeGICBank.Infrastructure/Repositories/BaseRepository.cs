@@ -6,7 +6,7 @@ namespace AwesomeGICBank.Infrastructure.Repositories
     {
         private string ConnectionString => "Data Source=" + Path.Combine(
             Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName,
-            "AwesomeGICBank.Infrastructure", "Data", "BankEaseDB.db");
+            "AwesomeGICBank.Infrastructure", "Data", "AwesomeGICBankDB.db");
 
         protected void ExecuteNonQuery(string commandText, Action<SqliteCommand> parameterAction = null)
         {
